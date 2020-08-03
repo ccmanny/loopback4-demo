@@ -3,7 +3,7 @@ import {
   CountSchema,
   Filter,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
   del,
@@ -13,18 +13,16 @@ import {
   param,
   patch,
   post,
-  requestBody,
+  requestBody
 } from '@loopback/rest';
-import {
-  User,
-  ShoppingCart,
-} from '../models';
-import {UserRepository} from '../repositories';
+import {ShoppingCart} from '../models';
+import {ShoppingCartRepository, UserRepository} from '../repositories';
 
 export class UserShoppingCartController {
   constructor(
     @repository(UserRepository) protected userRepository: UserRepository,
-  ) { }
+    @repository(ShoppingCartRepository) protected shoppingCartRepository: ShoppingCartRepository,
+  ) {}
 
   @get('/users/{id}/shopping-carts', {
     responses: {
@@ -54,7 +52,7 @@ export class UserShoppingCartController {
     },
   })
   async create(
-    @param.path.string('id') id: typeof User.prototype.id,
+    @param.path.string('id') id: string,
     @requestBody({
       content: {
         'application/json': {
@@ -66,8 +64,9 @@ export class UserShoppingCartController {
         },
       },
     }) shoppingCart: Omit<ShoppingCart, 'id'>,
-  ): Promise<ShoppingCart> {
-    return this.userRepository.shoppingCarts(id).create(shoppingCart);
+  ): Promise<ShoppingCart | void> {
+    // return this.userRepository.shoppingCarts(id).create(shoppingCart);
+    return this.shoppingCartRepository.addItem(shoppingCart, id);
   }
 
   @patch('/users/{id}/shopping-carts', {

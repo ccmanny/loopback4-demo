@@ -1,4 +1,4 @@
-import {Entity, model, property, belongsTo} from '@loopback/repository';
+import {belongsTo, Entity, model, property} from '@loopback/repository';
 import {User} from './user.model';
 
 @model()
@@ -14,7 +14,13 @@ export class ShoppingCart extends Entity {
   userId: string;
 
   @property({
+    type: 'number',
+  })
+  quantity: number;
+
+  @property({
     type: 'string',
+    required: true,
   })
   productId?: string;
 
