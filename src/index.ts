@@ -1,5 +1,5 @@
 import {ApplicationConfig, MeituanApplication} from './application';
-
+import {wsClient} from './socketioClient/client';
 export * from './application';
 
 export async function main(options: ApplicationConfig = {}) {
@@ -7,6 +7,14 @@ export async function main(options: ApplicationConfig = {}) {
   await app.boot();
   await app.start();
 
+  const ws = wsClient.getInstance();
+  // setInterval(() => {
+  //   let i = 0;
+  //   console.log(ws.socket.disconnected);
+  //   ws.socket.emit('test', 'lb4' + i.toString());
+  // }, 3000);
+
+  // console.log(ws.socket.disconnected);
   const url = app.restServer.url;
   console.log(`Server is running at ${url}`);
   console.log(`Try ${url}/ping`);

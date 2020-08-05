@@ -1,6 +1,6 @@
-import {Request, RestBindings, get, ResponseObject} from '@loopback/rest';
-import {inject} from '@loopback/core';
-
+import {inject, intercept} from '@loopback/core';
+import {get, Request, ResponseObject, RestBindings} from '@loopback/rest';
+import {TestInterceptorInterceptor} from '../interceptors/test-interceptor.interceptor';
 /**
  * OpenAPI response for ping()
  */
@@ -31,6 +31,7 @@ const PING_RESPONSE: ResponseObject = {
 /**
  * A simple controller to bounce back http requests
  */
+@intercept(TestInterceptorInterceptor.name)
 export class PingController {
   constructor(@inject(RestBindings.Http.REQUEST) private req: Request) {}
 
@@ -41,6 +42,7 @@ export class PingController {
     },
   })
   ping(): object {
+    console.log('--pingController--')
     // Reply with a greeting, the current time, the url, and request headers
     return {
       greeting: 'Hello from LoopBack',

@@ -1,15 +1,15 @@
 import {BootMixin} from '@loopback/boot';
-import {ApplicationConfig} from '@loopback/core';
-import {
-  RestExplorerBindings,
-  RestExplorerComponent,
-} from '@loopback/rest-explorer';
+import {ApplicationConfig, createBindingFromClass} from '@loopback/core';
 import {RepositoryMixin} from '@loopback/repository';
 import {RestApplication} from '@loopback/rest';
+import {
+  RestExplorerBindings,
+  RestExplorerComponent
+} from '@loopback/rest-explorer';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
+import {TestInterceptorInterceptor} from './interceptors/test-interceptor.interceptor';
 import {MySequence} from './sequence';
-
 export {ApplicationConfig};
 
 export class MeituanApplication extends BootMixin(
@@ -29,7 +29,7 @@ export class MeituanApplication extends BootMixin(
       path: '/explorer',
     });
     this.component(RestExplorerComponent);
-
+    this.add(createBindingFromClass(TestInterceptorInterceptor, {key: TestInterceptorInterceptor.name}));
     this.projectRoot = __dirname;
     // Customize @loopback/boot Booter Conventions here
     this.bootOptions = {
