@@ -7,6 +7,7 @@ export async function main(options: ApplicationConfig = {}) {
   await app.boot();
   await app.start();
 
+  //connect websocket server
   const ws = wsClient.getInstance();
   // setInterval(() => {
   //   let i = 0;
