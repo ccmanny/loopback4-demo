@@ -1,5 +1,8 @@
+import {authenticate, TokenService} from '@loopback/authentication';
+import {TokenServiceBindings} from '@loopback/authentication-jwt';
 import {inject, intercept} from '@loopback/core';
 import {get, Request, ResponseObject, RestBindings} from '@loopback/rest';
+import {securityId} from '@loopback/security';
 import {TestInterceptorInterceptor} from '../interceptors/test-interceptor.interceptor';
 /**
  * OpenAPI response for ping()
@@ -33,7 +36,9 @@ const PING_RESPONSE: ResponseObject = {
  */
 @intercept(TestInterceptorInterceptor.name)
 export class PingController {
-  constructor(@inject(RestBindings.Http.REQUEST) private req: Request) {}
+  constructor(@inject(RestBindings.Http.REQUEST) private req: Request,
+    @inject(TokenServiceBindings.TOKEN_SERVICE) private jwtService: TokenService
+  ) {}
 
   // Map to `GET /ping`
   @get('/ping', {
@@ -41,14 +46,25 @@ export class PingController {
       '200': PING_RESPONSE,
     },
   })
-  ping(): object {
+  @authenticate('jwt')
+  async ping(): Promise<any> {
     console.log('--pingController--')
-    // Reply with a greeting, the current time, the url, and request headers
-    return {
-      greeting: 'Hello from LoopBack',
-      date: new Date(),
-      url: this.req.url,
-      headers: Object.assign({}, this.req.headers),
+    let userInfo = {
+      [securityId]: '1',
+      email: "dc@qq.com",
+      name: "dc",
+
     };
+    let token = await this.jwtService.generateToken(userInfo);
+    // let user = await this.jwtService.verifyToken(token);
+    return token;
+    // Reply with a greeting, the current time, the url, and request headers
+
+    // return {
+    //   greeting: 'Hello from LoopBack',
+    //   date: new Date(),
+    //   url: this.req.url,
+    //   headers: Object.assign({}, this.req.headers),
+    // };
   }
 }
