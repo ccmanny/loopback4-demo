@@ -218,6 +218,7 @@ export class UserController {
       name: user.name,
       roles: user.roles,
     };
+    console.log("userinfo : " + JSON.stringify(userInfo));
     let token = await this.jwtService.generateToken(userInfo)
     return {token: token};
   }

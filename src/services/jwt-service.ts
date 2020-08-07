@@ -16,7 +16,7 @@ export class JWTService implements TokenService {
   ) {}
   async generateToken(userProfile: UserProfile): Promise<string> {
     if (!userProfile) {
-      throw new HttpErrors.Unauthorized('ERROR Token generate. userProfile is null 123 ');
+      throw new HttpErrors.Unauthorized('ERROR Token generate. userProfile MISS ');
     }
     const userInfoForToken = {
       id: userProfile[securityId],
@@ -39,14 +39,27 @@ export class JWTService implements TokenService {
   async verifyToken(token: string): Promise<UserProfile> {
     if (!token)
       throw new HttpErrors.Unauthorized(`not found token `);
-    let result = await verifyAsync(token, this.jwtSecret)
-    let userProfile = {
+    let userProfile: UserProfile;
+    let result: any;
+    try {
+      result = await verifyAsync(token, this.jwtSecret)
+    } catch (error) {
+      // console.log(error);
+      if (error.message == 'jwt expired') {
+        throw new HttpErrors.Unauthorized(`ERROR : Token expired `);
+      } else {
+        throw new HttpErrors.Unauthorized(error);
+      }
+    }
+    userProfile = {
       [securityId]: result.id,
       id: result.id,
       name: result.name,
       roles: result.roles,
     }
+    console.log("userProfile: " + JSON.stringify(userProfile));
     return userProfile;
+
   }
 
 }

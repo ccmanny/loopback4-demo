@@ -3,7 +3,7 @@ import {BindingKey} from '@loopback/context';
 import {PasswordHasher} from './services/hash.password.bcryptjs';
 export namespace TokenServiceConstants {
   export const TOKEN_SECRET_VALUE = 'dctest';
-  export const TOKEN_EXPIRE_IN_VALUE = 1200;
+  export const TOKEN_EXPIRE_IN_VALUE = 12000;
 }
 
 export namespace TokneServiceBindings {
