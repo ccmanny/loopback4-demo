@@ -1,3 +1,6 @@
+import {authenticate, TokenService} from '@loopback/authentication';
+import {TokenServiceBindings} from '@loopback/authentication-jwt';
+import {authorize} from '@loopback/authorization';
 import {inject} from '@loopback/core';
 import {
   Count,
@@ -8,7 +11,7 @@ import {
   Where
 } from '@loopback/repository';
 import {
-  del, get,
+  get,
   getModelSchemaRef,
 
   HttpErrors, param,
@@ -19,22 +22,26 @@ import {
 
 
 
-  put,
+
 
   requestBody
 } from '@loopback/rest';
+import {securityId, UserProfile} from '@loopback/security';
 import {PasswordHasherBindings} from '../key';
 import {User} from '../models';
 import {UserRepository} from '../repositories';
 import {Credentials} from '../repositories/user.repository';
+import {basicAuthorization} from '../services/basic.authorizor';
 import {PasswordHasher} from '../services/hash.password.bcryptjs';
 import {vaildateCredentials} from '../services/vaildateCredentials';
+
 export class UserController {
   constructor(
     @repository(UserRepository)
     public userRepository: UserRepository,
     @inject(PasswordHasherBindings.PASSWORD_HASHER)
     public passwordHasher: PasswordHasher,
+    @inject(TokenServiceBindings.TOKEN_SERVICE) private jwtService: TokenService,
   ) {}
 
   @post('/users', {
@@ -83,6 +90,8 @@ export class UserController {
 
   }
 
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['admin'], voters: [basicAuthorization]})
   @get('/users/count', {
     responses: {
       '200': {
@@ -97,6 +106,8 @@ export class UserController {
     return this.userRepository.count(where);
   }
 
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['admin'], voters: [basicAuthorization]})
   @get('/users', {
     responses: {
       '200': {
@@ -118,28 +129,9 @@ export class UserController {
     return this.userRepository.find(filter);
   }
 
-  @patch('/users', {
-    responses: {
-      '200': {
-        description: 'User PATCH success count',
-        content: {'application/json': {schema: CountSchema}},
-      },
-    },
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(User, {partial: true}),
-        },
-      },
-    })
-    user: User,
-    @param.where(User) where?: Where<User>,
-  ): Promise<Count> {
-    return this.userRepository.updateAll(user, where);
-  }
 
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['admin', 'customer', 'shop'], voters: [basicAuthorization]})
   @get('/users/{id}', {
     responses: {
       '200': {
@@ -159,6 +151,8 @@ export class UserController {
     return this.userRepository.findById(id, filter);
   }
 
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['admin', 'customer', 'shop'], voters: [basicAuthorization]})
   @patch('/users/{id}', {
     responses: {
       '204': {
@@ -177,31 +171,54 @@ export class UserController {
     })
     user: User,
   ): Promise<void> {
+    delete user.password;
     await this.userRepository.updateById(id, user);
   }
 
-  @put('/users/{id}', {
-    responses: {
-      '204': {
-        description: 'User PUT success',
-      },
-    },
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() user: User,
-  ): Promise<void> {
-    await this.userRepository.replaceById(id, user);
-  }
 
-  @del('/users/{id}', {
+  @post('/users/login', {
     responses: {
-      '204': {
-        description: 'User DELETE success',
+      '200': {
+        description: 'Token',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                token: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
       },
     },
   })
-  async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.userRepository.deleteById(id);
+  async login(
+    @requestBody() credentials: Credentials,
+  ): Promise<{token: string}> {
+    let userInfo: UserProfile;
+
+    let user = await this.userRepository.findOne({
+      where: {
+        account: credentials.account,
+      }
+    });
+    if (user == null) {
+      throw new HttpErrors.Unauthorized('account or password errer ');
+    }
+    let passwordIsMatched = await this.passwordHasher.comparePassword(credentials.password, user.password);
+    if (!passwordIsMatched) {
+      throw new HttpErrors.Unauthorized('account or password errer ');
+    }
+    userInfo = {
+      [securityId]: user.id,
+      account: user.account,
+      name: user.name,
+      roles: user.roles,
+    };
+    let token = await this.jwtService.generateToken(userInfo)
+    return {token: token};
   }
 }

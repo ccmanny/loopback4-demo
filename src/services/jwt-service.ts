@@ -18,7 +18,6 @@ export class JWTService implements TokenService {
     if (!userProfile) {
       throw new HttpErrors.Unauthorized('ERROR Token generate. userProfile is null 123 ');
     }
-    console.log('token start')
     const userInfoForToken = {
       id: userProfile[securityId],
       name: userProfile.name,

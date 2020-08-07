@@ -22,7 +22,7 @@ export class User extends Entity {
     id: true,
     generated: true,
   })
-  id?: string;
+  id: string;
 
   @property({
     type: 'string',
@@ -35,6 +35,12 @@ export class User extends Entity {
     required: true,
   })
   password: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  name: string;
 
   @property({
     type: 'array',
