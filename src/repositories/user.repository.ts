@@ -1,15 +1,20 @@
-import {DefaultCrudRepository, repository, HasManyRepositoryFactory} from '@loopback/repository';
-import {User, UserRelations, Order, ShoppingCart} from '../models';
+import {Getter, inject} from '@loopback/core';
+import {DefaultCrudRepository, HasManyRepositoryFactory, repository} from '@loopback/repository';
 import {MongoDbDataSource} from '../datasources';
-import {inject, Getter} from '@loopback/core';
+import {Order, ShoppingCart, User, UserRelations} from '../models';
 import {OrderRepository} from './order.repository';
 import {ShoppingCartRepository} from './shopping-cart.repository';
+
+export interface Credentials {
+  account: string,
+  password: string
+}
 
 export class UserRepository extends DefaultCrudRepository<
   User,
   typeof User.prototype.id,
   UserRelations
-> {
+  > {
 
   public readonly orders: HasManyRepositoryFactory<Order, typeof User.prototype.id>;
 

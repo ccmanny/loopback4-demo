@@ -12,8 +12,9 @@ import {
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import {TestInterceptorInterceptor} from './interceptors/test-interceptor.interceptor';
-import {TokenServiceConstants, TokneServiceBindings} from './key';
+import {PasswordHasherBindings, TokenServiceConstants, TokneServiceBindings} from './key';
 import {MySequence} from './sequence';
+import {BcryptHasher} from './services/hash.password.bcryptjs';
 import {JWTService} from './services/jwt-service';
 export {ApplicationConfig};
 
@@ -53,6 +54,9 @@ export class MeituanApplication extends BootMixin(
     };
   }
   setBindings(): void {
+
+    this.bind(PasswordHasherBindings.ROUNDS).to(10);
+    this.bind(PasswordHasherBindings.PASSWORD_HASHER).toClass(BcryptHasher);
 
     this.bind(TokneServiceBindings.TOKEN_EXPIRE_IN).to(TokenServiceConstants.TOKEN_EXPIRE_IN_VALUE);
     this.bind(TokneServiceBindings.TOKEN_SECRET).to(TokenServiceConstants.TOKEN_SECRET_VALUE);

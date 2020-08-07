@@ -1,28 +1,40 @@
+import {inject} from '@loopback/core';
 import {
   Count,
   CountSchema,
   Filter,
   FilterExcludingWhere,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
-  post,
-  param,
-  get,
+  del, get,
   getModelSchemaRef,
-  patch,
+
+  HttpErrors, param,
+
+
+  patch, post,
+
+
+
+
   put,
-  del,
-  requestBody,
+
+  requestBody
 } from '@loopback/rest';
+import {PasswordHasherBindings} from '../key';
 import {User} from '../models';
 import {UserRepository} from '../repositories';
-
+import {Credentials} from '../repositories/user.repository';
+import {PasswordHasher} from '../services/hash.password.bcryptjs';
+import {vaildateCredentials} from '../services/vaildateCredentials';
 export class UserController {
   constructor(
     @repository(UserRepository)
-    public userRepository : UserRepository,
+    public userRepository: UserRepository,
+    @inject(PasswordHasherBindings.PASSWORD_HASHER)
+    public passwordHasher: PasswordHasher,
   ) {}
 
   @post('/users', {
@@ -46,7 +58,29 @@ export class UserController {
     })
     user: Omit<User, 'id'>,
   ): Promise<User> {
-    return this.userRepository.create(user);
+    let credentials: Credentials;
+    credentials = {
+      account: user.account,
+      password: user.password
+    }
+    vaildateCredentials(credentials);
+    if (!user.roles) {
+      user.roles = ['customer'];
+    }
+    user.password = await this.passwordHasher.hashPassword(user.password);
+    try {
+      let res = this.userRepository.create(user);
+      delete (await res).password;
+      return res;
+    } catch (error) {
+      if (error.code === 11000 && error.errmsg.includes('index: uniqueAccount')) {
+        throw new HttpErrors.Conflict('account value is exist');
+      } else {
+        throw error;
+      }
+    }
+
+
   }
 
   @get('/users/count', {

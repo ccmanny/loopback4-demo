@@ -65,9 +65,9 @@ export async function basicAuthorization(
    *
    * eg. @post('/users/{userId}/orders', ...) returns `userId` as args[0]
    */
-  // if (currentUser[securityId] === authorizationCtx.invocationContext.args[0]) {
-  //   return AuthorizationDecision.ALLOW;
-  // }
+  if (currentUser[securityId] === authorizationCtx.invocationContext.args[0]) {
+    return AuthorizationDecision.ALLOW;
+  }
 
   return AuthorizationDecision.DENY;
 }
