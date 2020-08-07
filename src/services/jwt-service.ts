@@ -16,12 +16,13 @@ export class JWTService implements TokenService {
   ) {}
   async generateToken(userProfile: UserProfile): Promise<string> {
     if (!userProfile) {
-      throw new HttpErrors.Unauthorized('ERROR Token generate. userProfile is null ');
+      throw new HttpErrors.Unauthorized('ERROR Token generate. userProfile is null 123 ');
     }
+    console.log('token start')
     const userInfoForToken = {
       id: userProfile[securityId],
       name: userProfile.name,
-      role: userProfile.roles,
+      roles: userProfile.roles,
     }
     let token: string;
     try {
@@ -35,15 +36,16 @@ export class JWTService implements TokenService {
     }
     return token;
   }
+
   async verifyToken(token: string): Promise<UserProfile> {
     if (!token)
       throw new HttpErrors.Unauthorized(`not found token `);
-    let result = await verifyAsync(token)
+    let result = await verifyAsync(token, this.jwtSecret)
     let userProfile = {
       [securityId]: result.id,
       id: result.id,
       name: result.name,
-      role: result.roles,
+      roles: result.roles,
     }
     return userProfile;
   }

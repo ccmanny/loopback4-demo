@@ -1,4 +1,4 @@
-import {authenticate, TokenService} from '@loopback/authentication';
+import {TokenService} from '@loopback/authentication';
 import {TokenServiceBindings} from '@loopback/authentication-jwt';
 import {inject, intercept} from '@loopback/core';
 import {get, Request, ResponseObject, RestBindings} from '@loopback/rest';
@@ -37,7 +37,7 @@ const PING_RESPONSE: ResponseObject = {
 @intercept(TestInterceptorInterceptor.name)
 export class PingController {
   constructor(@inject(RestBindings.Http.REQUEST) private req: Request,
-    @inject(TokenServiceBindings.TOKEN_SERVICE) private jwtService: TokenService
+    @inject(TokenServiceBindings.TOKEN_SERVICE) private jwtService: TokenService,
   ) {}
 
   // Map to `GET /ping`
@@ -46,18 +46,20 @@ export class PingController {
       '200': PING_RESPONSE,
     },
   })
-  @authenticate('jwt')
+  // @authenticate('jwt')
+  // @authorize({allowedRoles: ['admin'], voters: [basicAuthorization]})
   async ping(): Promise<any> {
     console.log('--pingController--')
     let userInfo = {
       [securityId]: '1',
       email: "dc@qq.com",
       name: "dc",
-
+      roles: ["admin"],
     };
+    console.log(this.jwtService)
     let token = await this.jwtService.generateToken(userInfo);
-    // let user = await this.jwtService.verifyToken(token);
-    return token;
+    let user = await this.jwtService.verifyToken(token);
+    return user;
     // Reply with a greeting, the current time, the url, and request headers
 
     // return {

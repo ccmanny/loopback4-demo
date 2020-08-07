@@ -11,8 +11,8 @@ export namespace TokneServiceBindings {
     'authentication.jwt.secret',
   );
   export const TOKEN_EXPIRE_IN = BindingKey.create<number>(
-    'authentication.jwt.expires.in.second',
+    'authentication.jwt.expires.in.seconds',
   );
   export const TOKEN_SERVICE = BindingKey.create<TokenService>(
-    'authentication.jwt.tokenservice');
+    'services.authentication.jwt.tokenservice');
 }

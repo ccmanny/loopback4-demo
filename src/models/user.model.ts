@@ -1,4 +1,4 @@
-import {Entity, model, property, hasMany} from '@loopback/repository';
+import {Entity, hasMany, model, property} from '@loopback/repository';
 import {Order} from './order.model';
 import {ShoppingCart} from './shopping-cart.model';
 
@@ -22,6 +22,12 @@ export class User extends Entity {
     required: true,
   })
   password: string;
+
+  @property({
+    type: 'array',
+    itemType: 'string',
+  })
+  roles?: string[];
 
   @hasMany(() => Order)
   orders: Order[];

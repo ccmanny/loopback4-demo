@@ -53,8 +53,9 @@ export class MeituanApplication extends BootMixin(
     };
   }
   setBindings(): void {
-    this.bind(TokneServiceBindings.TOKEN_SERVICE).toClass(JWTService);
+
     this.bind(TokneServiceBindings.TOKEN_EXPIRE_IN).to(TokenServiceConstants.TOKEN_EXPIRE_IN_VALUE);
     this.bind(TokneServiceBindings.TOKEN_SECRET).to(TokenServiceConstants.TOKEN_SECRET_VALUE);
+    this.bind(TokneServiceBindings.TOKEN_SERVICE).toClass(JWTService);
   }
 }
