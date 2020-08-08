@@ -1,30 +1,36 @@
+import {authenticate} from '@loopback/authentication';
+import {authorize} from '@loopback/authorization';
+import {inject} from '@loopback/core';
 import {
   Count,
   CountSchema,
   Filter,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
   del,
   get,
   getModelSchemaRef,
   getWhereSchemaFor,
-  param,
+
+
+
+
+  HttpErrors, param,
   patch,
   post,
-  requestBody,
+  requestBody
 } from '@loopback/rest';
-import {
-  Shop,
-  Product,
-} from '../models';
+import {SecurityBindings, UserProfile} from '@loopback/security';
+import {Product, Shop} from '../models';
 import {ShopRepository} from '../repositories';
+import {basicAuthorization} from '../services/basic.authorizor';
 
 export class ShopProductController {
   constructor(
     @repository(ShopRepository) protected shopRepository: ShopRepository,
-  ) { }
+  ) {}
 
   @get('/shops/{id}/products', {
     responses: {
@@ -45,6 +51,8 @@ export class ShopProductController {
     return this.shopRepository.products(id).find(filter);
   }
 
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['shop'], voters: [basicAuthorization]})
   @post('/shops/{id}/products', {
     responses: {
       '200': {
@@ -54,6 +62,7 @@ export class ShopProductController {
     },
   })
   async create(
+    @inject(SecurityBindings.USER) currentUser: UserProfile,
     @param.path.string('id') id: typeof Shop.prototype.id,
     @requestBody({
       content: {
@@ -67,9 +76,13 @@ export class ShopProductController {
       },
     }) product: Omit<Product, 'id'>,
   ): Promise<Product> {
+    if (currentUser.shopId !== id)
+      throw new HttpErrors.Unauthorized('error : only can operation your shop ');
     return this.shopRepository.products(id).create(product);
   }
 
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['shop'], voters: [basicAuthorization]})
   @patch('/shops/{id}/products', {
     responses: {
       '200': {
@@ -90,9 +103,12 @@ export class ShopProductController {
     product: Partial<Product>,
     @param.query.object('where', getWhereSchemaFor(Product)) where?: Where<Product>,
   ): Promise<Count> {
+    delete product.shopId;
     return this.shopRepository.products(id).patch(product, where);
   }
 
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['shop'], voters: [basicAuthorization]})
   @del('/shops/{id}/products', {
     responses: {
       '200': {
