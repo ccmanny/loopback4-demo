@@ -2,9 +2,9 @@ import {authenticate, TokenService} from '@loopback/authentication';
 import {TokenServiceBindings} from '@loopback/authentication-jwt';
 import {authorize} from '@loopback/authorization';
 import {inject, intercept} from '@loopback/core';
-import {get, Request, ResponseObject, RestBindings} from '@loopback/rest';
+import {get, HttpErrors, Request, ResponseObject, RestBindings} from '@loopback/rest';
 import {securityId, UserProfile} from '@loopback/security';
-import {TestInterceptorInterceptor} from '../interceptors/test-interceptor.interceptor';
+import {InterceptorseBindings} from '../key';
 import {basicAuthorization} from '../services/basic.authorizor';
 /**
  * OpenAPI response for ping()
@@ -36,7 +36,7 @@ const PING_RESPONSE: ResponseObject = {
 /**
  * A simple controller to bounce back http requests
  */
-@intercept(TestInterceptorInterceptor.name)
+@intercept(InterceptorseBindings.ERRORLOG_INTERCEPTOR)
 export class PingController {
   constructor(@inject(RestBindings.Http.REQUEST) private req: Request,
     @inject(TokenServiceBindings.TOKEN_SERVICE) private jwtService: TokenService
@@ -52,6 +52,7 @@ export class PingController {
   // @authorize({allowedRoles: ['admin'], voters: [basicAuthorization]})
   async ping(): Promise<any> {
     console.log('--pingController--')
+    throw new HttpErrors.NotAcceptable('ping err');
     let userInfo: UserProfile;
     userInfo = {
       [securityId]: '1',

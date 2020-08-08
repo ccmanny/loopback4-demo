@@ -11,3 +11,4 @@ export * from './product.controller';
 export * from './user-shop.controller';
 export * from './shop-user.controller';
 export * from './shop.controller';
+export * from './error-log.controller';
