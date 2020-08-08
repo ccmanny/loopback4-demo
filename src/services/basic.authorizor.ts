@@ -24,8 +24,9 @@ export async function basicAuthorization(
       'id',
       'name',
       'roles',
+      'shopId',
     ]);
-    currentUser = {[securityId]: user.id, name: user.name, roles: user.roles};
+    currentUser = {[securityId]: user.id, name: user.name, roles: user.roles, shopId: user.shopId};
     // console.log(authorizationCtx.principals[0]);
   } else {
     return AuthorizationDecision.DENY;
@@ -67,7 +68,8 @@ export async function basicAuthorization(
    */
   console.log('currentUser[securityId] = ' + currentUser[securityId]);
   console.log('authorizationCtx.invocationContext.args[0] = ' + authorizationCtx.invocationContext.args[0]);
-  if (currentUser[securityId] === authorizationCtx.invocationContext.args[0]) {
+  if (currentUser[securityId] === authorizationCtx.invocationContext.args[0]
+    || currentUser.shopId === authorizationCtx.invocationContext.args[0]) {
     return AuthorizationDecision.ALLOW;
   }
 

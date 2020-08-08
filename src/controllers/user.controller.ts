@@ -29,7 +29,7 @@ import {
 import {securityId, UserProfile} from '@loopback/security';
 import {PasswordHasherBindings} from '../key';
 import {User} from '../models';
-import {UserRepository} from '../repositories';
+import {ShopRepository, UserRepository} from '../repositories';
 import {Credentials} from '../repositories/user.repository';
 import {basicAuthorization} from '../services/basic.authorizor';
 import {PasswordHasher} from '../services/hash.password.bcryptjs';
@@ -39,6 +39,8 @@ export class UserController {
   constructor(
     @repository(UserRepository)
     public userRepository: UserRepository,
+    @repository(ShopRepository)
+    public shopRepository: ShopRepository,
     @inject(PasswordHasherBindings.PASSWORD_HASHER)
     public passwordHasher: PasswordHasher,
     @inject(TokenServiceBindings.TOKEN_SERVICE) private jwtService: TokenService,
@@ -212,11 +214,13 @@ export class UserController {
     if (!passwordIsMatched) {
       throw new HttpErrors.Unauthorized('account or password errer ');
     }
+    let userShopInfo = await this.shopRepository.findOne({where: {userId: user.id}})
     userInfo = {
       [securityId]: user.id,
       account: user.account,
       name: user.name,
       roles: user.roles,
+      shopId: userShopInfo?.id,
     };
     console.log("userinfo : " + JSON.stringify(userInfo));
     let token = await this.jwtService.generateToken(userInfo)

@@ -31,7 +31,6 @@ export class UserShopController {
   ) {}
 
   @authenticate('jwt')
-  @authorize({allowedRoles: ['shop'], voters: [basicAuthorization]})
   @get('/users/{id}/shop', {
     responses: {
       '200': {

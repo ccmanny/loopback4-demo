@@ -22,6 +22,7 @@ export class JWTService implements TokenService {
       id: userProfile[securityId],
       name: userProfile.name,
       roles: userProfile.roles,
+      shopId: userProfile.shopId,
     }
     let token: string;
     try {
@@ -56,6 +57,7 @@ export class JWTService implements TokenService {
       id: result.id,
       name: result.name,
       roles: result.roles,
+      shopId: result.shopId,
     }
     console.log("userProfile: " + JSON.stringify(userProfile));
     return userProfile;
