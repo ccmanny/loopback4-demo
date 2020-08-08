@@ -1,9 +1,11 @@
+import {authenticate} from '@loopback/authentication';
+import {authorize} from '@loopback/authorization';
 import {
   Count,
   CountSchema,
   Filter,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
   del,
@@ -13,18 +15,17 @@ import {
   param,
   patch,
   post,
-  requestBody,
+  requestBody
 } from '@loopback/rest';
-import {
-  User,
-  Order,
-} from '../models';
+import {Order, User} from '../models';
 import {UserRepository} from '../repositories';
+import {basicAuthorization} from '../services/basic.authorizor';
 
 export class UserOrderController {
   constructor(
     @repository(UserRepository) protected userRepository: UserRepository,
-  ) { }
+  ) {}
+
 
   @get('/users/{id}/orders', {
     responses: {
@@ -45,6 +46,8 @@ export class UserOrderController {
     return this.userRepository.orders(id).find(filter);
   }
 
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['customer'], voters: [basicAuthorization]})
   @post('/users/{id}/orders', {
     responses: {
       '200': {
@@ -70,6 +73,8 @@ export class UserOrderController {
     return this.userRepository.orders(id).create(order);
   }
 
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['customer'], voters: [basicAuthorization]})
   @patch('/users/{id}/orders', {
     responses: {
       '200': {
@@ -93,6 +98,8 @@ export class UserOrderController {
     return this.userRepository.orders(id).patch(order, where);
   }
 
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['customer'], voters: [basicAuthorization]})
   @del('/users/{id}/orders', {
     responses: {
       '200': {

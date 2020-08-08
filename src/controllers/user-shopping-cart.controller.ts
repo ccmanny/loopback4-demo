@@ -1,3 +1,5 @@
+import {authenticate} from '@loopback/authentication';
+import {authorize} from '@loopback/authorization';
 import {
   Count,
   CountSchema,
@@ -17,13 +19,15 @@ import {
 } from '@loopback/rest';
 import {ShoppingCart} from '../models';
 import {ShoppingCartRepository, UserRepository} from '../repositories';
-
+import {basicAuthorization} from '../services/basic.authorizor';
 export class UserShoppingCartController {
   constructor(
     @repository(UserRepository) protected userRepository: UserRepository,
     @repository(ShoppingCartRepository) protected shoppingCartRepository: ShoppingCartRepository,
   ) {}
 
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['customer'], voters: [basicAuthorization]})
   @get('/users/{id}/shopping-carts', {
     responses: {
       '200': {
@@ -43,6 +47,8 @@ export class UserShoppingCartController {
     return this.userRepository.shoppingCarts(id).find(filter);
   }
 
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['customer'], voters: [basicAuthorization]})
   @post('/users/{id}/shopping-carts', {
     responses: {
       '200': {
@@ -69,6 +75,8 @@ export class UserShoppingCartController {
     return this.shoppingCartRepository.addItem(shoppingCart, id);
   }
 
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['customer'], voters: [basicAuthorization]})
   @patch('/users/{id}/shopping-carts', {
     responses: {
       '200': {
@@ -92,6 +100,8 @@ export class UserShoppingCartController {
     return this.userRepository.shoppingCarts(id).patch(shoppingCart, where);
   }
 
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['customer'], voters: [basicAuthorization]})
   @del('/users/{id}/shopping-carts', {
     responses: {
       '200': {
