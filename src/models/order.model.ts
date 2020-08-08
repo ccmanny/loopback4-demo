@@ -1,6 +1,11 @@
-import {Entity, model, property, belongsTo} from '@loopback/repository';
+import {belongsTo, Entity, model, property} from '@loopback/repository';
+import {OrderItem} from './order-item.model';
 import {User} from './user.model';
-
+// export interface OrderItem{
+//   productName:string,
+//   price:number,
+//   quantity:number
+// }
 @model()
 export class Order extends Entity {
   @property({
@@ -15,6 +20,22 @@ export class Order extends Entity {
     required: true,
   })
   fullName: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  shopName: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  shopId: string;
+
+  @property.array(OrderItem, {required: true})
+  orderItem: OrderItem[];
+
 
   @belongsTo(() => User)
   userId: string;

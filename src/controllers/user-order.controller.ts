@@ -20,7 +20,7 @@ import {
 import {Order, User} from '../models';
 import {UserRepository} from '../repositories';
 import {basicAuthorization} from '../services/basic.authorizor';
-
+import {wsClient} from '../socketioClient/client';
 export class UserOrderController {
   constructor(
     @repository(UserRepository) protected userRepository: UserRepository,
@@ -46,8 +46,8 @@ export class UserOrderController {
     return this.userRepository.orders(id).find(filter);
   }
 
-  @authenticate('jwt')
-  @authorize({allowedRoles: ['customer'], voters: [basicAuthorization]})
+  // @authenticate('jwt')
+  // @authorize({allowedRoles: ['customer'], voters: [basicAuthorization]})
   @post('/users/{id}/orders', {
     responses: {
       '200': {
@@ -70,7 +70,16 @@ export class UserOrderController {
       },
     }) order: Omit<Order, 'id'>,
   ): Promise<Order> {
-    return this.userRepository.orders(id).create(order);
+    let res = this.userRepository.orders(id).create(order);
+    let msgOBJ = {
+      room: "001",
+      key: "asd",
+      msg: "There are new orders"
+    }
+    // push data by websocket server
+    const ws = wsClient.getInstance();
+    ws.socket.emit('pushSomeone', JSON.stringify(msgOBJ));
+    return res;
   }
 
   @authenticate('jwt')
