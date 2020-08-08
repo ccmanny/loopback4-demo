@@ -65,6 +65,8 @@ export async function basicAuthorization(
    *
    * eg. @post('/users/{userId}/orders', ...) returns `userId` as args[0]
    */
+  console.log('currentUser[securityId] = ' + currentUser[securityId]);
+  console.log('authorizationCtx.invocationContext.args[0] = ' + authorizationCtx.invocationContext.args[0]);
   if (currentUser[securityId] === authorizationCtx.invocationContext.args[0]) {
     return AuthorizationDecision.ALLOW;
   }

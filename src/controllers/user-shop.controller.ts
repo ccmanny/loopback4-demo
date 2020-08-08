@@ -11,18 +11,23 @@ import {
   get,
   getModelSchemaRef,
   getWhereSchemaFor,
-  param,
+
+
+
+
+  HttpErrors, param,
   patch,
   post,
   requestBody
 } from '@loopback/rest';
 import {Shop, User} from '../models';
-import {UserRepository} from '../repositories';
+import {ShopRepository, UserRepository} from '../repositories';
 import {basicAuthorization} from '../services/basic.authorizor';
 
 export class UserShopController {
   constructor(
     @repository(UserRepository) protected userRepository: UserRepository,
+    @repository(ShopRepository) protected shopRepository: ShopRepository,
   ) {}
 
   @authenticate('jwt')
@@ -70,6 +75,9 @@ export class UserShopController {
       },
     }) shop: Omit<Shop, 'id'>,
   ): Promise<Shop> {
+    let res = await this.shopRepository.findOne({where: {userId: id}})
+    if (res)
+      throw new HttpErrors.Unauthorized('error : shop exsit ');
     return this.userRepository.shop(id).create(shop);
   }
 
