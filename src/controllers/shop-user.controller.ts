@@ -1,14 +1,11 @@
+import {repository} from '@loopback/repository';
 import {
-  repository,
-} from '@loopback/repository';
-import {
-  param,
   get,
-  getModelSchemaRef,
+  getModelSchemaRef, param
 } from '@loopback/rest';
 import {
   Shop,
-  User,
+  User
 } from '../models';
 import {ShopRepository} from '../repositories';
 
@@ -16,7 +13,7 @@ export class ShopUserController {
   constructor(
     @repository(ShopRepository)
     public shopRepository: ShopRepository,
-  ) { }
+  ) {}
 
   @get('/shops/{id}/user', {
     responses: {
