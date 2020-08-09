@@ -23,5 +23,17 @@ export class ErrorLogService {
     //   {$limit: 2}
     // ]).get();
     // console.log(result);
+    // let res: any;
+    // if (!this.errorLogRepository.dataSource.connected) await this.errorLogRepository.dataSource.connect();
+    // this.errorLogRepository.dataSource.connector!.client.db(this.errorLogRepository.dataSource.settings.database).collection('ErrorLog').aggregate([
+    //   {"$project": {"errorMessage": 1, "day": {"$dateToString": {"format": "%Y-%m-%d", "date": "$createTime", "timezone": "Asia/Shanghai"}}}},
+    //   {"$group": {"_id": "$day", "value": {"$sum": 1}}},
+    //   {"$project": {"value": 1, "day": "$_id"}},
+    //   {"$sort": {"day": 1}}
+    // ], {}).toArray((error: any, documents: any[]) => {
+    //   res = documents;
+    //   console.log(documents)
+    // });
+    // console.log(res);
   }
 }

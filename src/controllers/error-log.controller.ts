@@ -77,4 +77,46 @@ export class ErrorLogController {
     return this.errorLogRepository.findById(id, filter);
   }
 
+  @get('/error-logs/sum', {
+    responses: {
+      '200': {
+        description: 'ErrorLog model count',
+        content: {'application/json': {schema: CountSchema}},
+      },
+    },
+  })
+  async sum(
+    @param.where(ErrorLog) where?: Where<ErrorLog>,
+  ): Promise<any> {
+    let res: any;
+    let p = () => {
+      return new Promise((resolve, reject) => {
+        if (!this.errorLogRepository.dataSource.connected) this.errorLogRepository.dataSource.connect();
+        this.errorLogRepository.dataSource.connector!.client.db(this.errorLogRepository.dataSource.settings.database).collection('ErrorLog').aggregate([
+          {"$project": {"errorMessage": 1, "day": {"$dateToString": {"format": "%Y-%m-%d", "date": "$createTime", "timezone": "Asia/Shanghai"}}}},
+          {"$group": {"_id": "$day", "value": {"$sum": 1}}},
+          {"$project": {"value": 1, "day": "$_id"}},
+          {"$sort": {"day": 1}}
+        ], {}).toArray((error: any, documents: any[]) => {
+          if (error)
+            reject(error)
+          resolve(documents);
+        });
+      });
+    };
+    res = await p();
+    return res;
+    // if (!this.errorLogRepository.dataSource.connected) await this.errorLogRepository.dataSource.connect();
+    //   this.errorLogRepository.dataSource.connector!.client.db(this.errorLogRepository.dataSource.settings.database).collection('ErrorLog').aggregate([
+    //   {"$project": {"errorMessage": 1, "day": {"$dateToString": {"format": "%Y-%m-%d", "date": "$createTime", "timezone": "Asia/Shanghai"}}}},
+    //   {"$group": {"_id": "$day", "value": {"$sum": 1}}},
+    //   {"$project": {"value": 1, "day": "$_id"}},
+    //   {"$sort": {"day": 1}}
+    // ], {}).toArray((error: any, documents: any[]) => {
+    //   console.log(documents);
+    //   res = documents;
+    // });
+    // return res;
+  }
+
 }
