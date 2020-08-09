@@ -17,7 +17,7 @@ export class wsClient {
 
   connect(): void {
 
-    this.socket = require('socket.io-client')('http://192.168.88.101:3000/chats/2?uid=asd');
+    this.socket = require('socket.io-client')('http://localhost:3001/chats/2?uid=asd');
     this.socket.on('connect', function () {
       console.log('wsclient connect')
     });
